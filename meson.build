@@ -15,6 +15,29 @@ cc = meson.get_compiler('c')
 
 swig = find_program('swig', required: true, native: true)
 
+# Try to find suitesparse if it is installed in the current python installation
+# (i.e. a conda env). We may end up with a problem if the CMake/pkg-config
+# version is different from the one installed in the environment.
+#
+# Even if pkg-config finds the library, we still need to try to find the
+# include dir so we can pass it to SWIG, because Meson does not support SWIG.
+# see https://github.com/mesonbuild/meson/issues/341.
+_conda_try_incdirs = []
+_conda_try_libdirs= []
+_py_data_path = py.get_path('data', 'UNKNOWN')
+if py.has_path('data')
+  # Anaconda defaults and conda-forge on Windows
+  _conda_try_incdirs += _py_data_path / 'Library' / 'include'
+  _conda_try_incdirs += _py_data_path / 'Library' / 'include' / 'suitesparse'
+
+  _conda_try_libdirs += _py_data_path / 'Library' / 'lib'
+
+  # Linux
+  _conda_try_incdirs += _py_data_path / 'include'
+  _conda_try_incdirs += _py_data_path / 'include' / 'suitesparse'
+
+  _conda_try_libdirs += _py_data_path / 'lib'
+endif
 
 # The list of paths here was taken over from numpy.distutils.system_info.py:
 _try_incdirs = [
@@ -29,14 +52,15 @@ _try_incdirs = [
 ]
 suitesparse_incdirs = []
 umfpack_header_dirs = []
-foreach _dir : _try_incdirs
+foreach _dir : _conda_try_incdirs + _try_incdirs
   if fs.exists(_dir)
     suitesparse_incdirs += _dir
     umfpack_header_dirs += include_directories(_dir)
   endif
 endforeach
 
-# TODO
+# It may be worth making umfpack_libdirs explicitly override the rest of the
+# library search, so that a given suitesparse installation can be specified.
 umfpack_libdirs = []
 umfpack_libdir = meson.get_external_property('umfpack-libdir', 'UNKNOWN')
 umfpack_includedir = meson.get_external_property('umfpack-includedir', 'UNKNOWN')
@@ -47,6 +71,12 @@ if umfpack_includedir != 'UNKNOWN'
     suitesparse_incdirs += umfpack_includedir
     umfpack_header_dirs += include_directories(umfpack_includedir)
 endif
+
+foreach _dir : _conda_try_libdirs
+  if fs.exists(_dir)
+    umfpack_libdirs += _dir
+  endif
+endforeach
 
 # Find UMFPACK library.
 # Note that Suitesparse packaging is messy; the headers may be found under

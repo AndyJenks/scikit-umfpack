@@ -15,32 +15,6 @@ foreach _dir : suitesparse_incdirs
     swig_inc_args += '-I' + _dir
 endforeach
 
-# This is a hack that gets at the location for conda envs (and perhaps other
-# types of envs), when building with conda compilers. We need proper SWIG
-# support for this to become more robust, see
-# https://github.com/mesonbuild/meson/issues/341.
-if cc.get_id() == 'gcc'
-    _cc_sysroot = run_command([cc, '-print-sysroot'], check: true).stdout().strip()
-    if _cc_sysroot.contains('bin/../')
-       _incdir = _cc_sysroot.split('bin/../')[0] / 'include'
-       if fs.exists(_incdir)
-           swig_inc_args += '-I' + _incdir
-       endif
-    endif
-elif cc.get_id() == 'clang'
-    _clang_v = run_command([cc, '-v'], check: true).stderr().strip()
-    if _clang_v.contains('InstalledDir: ')
-        _bindir = _clang_v.split('InstalledDir: ')[1]
-        if fs.exists(_bindir)
-            _incdir = _bindir / '../include'
-            if fs.exists(_incdir)
-                swig_inc_args += '-I' + _incdir
-            endif
-        endif
-    endif
-endif
-# The above took care of all fixed directories. We also need the default
-# compiler search directories, but Meson doesn't expose those.
 _umfpack_swig = custom_target('_umfpack_swig',
     output: [
         '_umfpack_wrap.c',
