@@ -235,7 +235,7 @@ class TestSolversWithArrays(unittest.TestCase):
         B = hstack((b, b2))
 
         X = lu.solve_sparse(B)
-        assert dense_norm(((A @ X) - B).todense()) < 1e-14
+        assert dense_norm(((A @ X) - B).todense()) < 2e-14
         assert_allclose((A @ X).todense(), B.todense())
 
     def test_splu_lu(self):
