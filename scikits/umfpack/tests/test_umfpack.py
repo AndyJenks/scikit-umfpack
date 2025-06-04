@@ -131,9 +131,9 @@ class TestFactorization(_DeprecationAccept):
 
     def test_complex_lu(self):
         # Getting factors of complex matrix
-        umfpack = um.UmfpackContext("zi")
 
         for A in self.complex_matrices:
+            umfpack = um.UmfpackContext("zi")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
@@ -152,9 +152,9 @@ class TestFactorization(_DeprecationAccept):
     @unittest.skipIf(_is_32bit_platform, reason="requires 64 bit platform")
     def test_complex_int64_lu(self):
         # Getting factors of complex matrix with long indices
-        umfpack = um.UmfpackContext("zl")
 
         for A in self.complex_int64_matrices:
+            umfpack = um.UmfpackContext("zl")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
@@ -172,9 +172,9 @@ class TestFactorization(_DeprecationAccept):
 
     def test_real_lu(self):
         # Getting factors of real matrix
-        umfpack = um.UmfpackContext("di")
 
         for A in self.real_matrices:
+            umfpack = um.UmfpackContext("di")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
@@ -193,9 +193,9 @@ class TestFactorization(_DeprecationAccept):
     @unittest.skipIf(_is_32bit_platform, reason="requires 64 bit platform")
     def test_real_int64_lu(self):
         # Getting factors of real matrix with long indices
-        umfpack = um.UmfpackContext("dl")
 
         for A in self.real_int64_matrices:
+            umfpack = um.UmfpackContext("dl")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
