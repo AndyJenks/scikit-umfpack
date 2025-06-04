@@ -138,7 +138,6 @@ class TestSolvers(unittest.TestCase):
         assert_allclose(A2, A.toarray(), atol=1e-13)
 
 
-@unittest.skipIf(Version(scipy.__version__) >= Version("1.13"), "Needs to fix deprecation")
 class TestSolversWithArrays(unittest.TestCase):
     """Same tests as above, but using the csc_array interface. Key difference 
     is that sparse arrays support matrix multiplication with the @ operator
@@ -189,7 +188,6 @@ class TestSolversWithArrays(unittest.TestCase):
         x = um.spsolve(a, b)
         assert_allclose(a @ x, b)
 
-    @unittest.skipIf(Version(scipy.__version__) >= Version("1.14"), "Needs to fix deprecation")
     def test_solve_sparse_rhs(self):
         # Solve with UMFPACK: double precision, sparse rhs
         a = self.a.astype('d')
