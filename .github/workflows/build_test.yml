@@ -1,17 +1,6 @@
 name: Build and Test
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-  schedule:
-    # Run at midnight on each Saturday
-    - cron:  '0 0 * * 6'
-  workflow_dispatch:
-    workflow: "*"
+on: [push, pull_request, workflow_dispatch]
 
 defaults:
   run:
