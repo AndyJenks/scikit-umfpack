@@ -8,7 +8,7 @@ from numpy.testing import assert_allclose
 from numpy.linalg import norm as dense_norm
 
 import scipy
-from scipy.sparse import csc_array, csc_matrix, spdiags, SparseEfficiencyWarning
+from scipy.sparse import csc_array, csc_matrix, coo_array, spdiags, SparseEfficiencyWarning
 from scipy.sparse import hstack
 
 import numpy as np
@@ -191,7 +191,15 @@ class TestSolversWithArrays(unittest.TestCase):
     def test_solve_sparse_rhs(self):
         # Solve with UMFPACK: double precision, sparse rhs
         a = self.a.astype('d')
-        b = csc_array(self.b).T
+        b = csc_array(self.b.reshape(self.b.shape[0], 1))
+        # b = scipy.sparse.coo_array(self.b)
+        x = um.spsolve(a, b)
+        assert_allclose(a @ x, self.b)
+
+    @unittest.skipIf(Version(scipy.__version__) < Version("1.13"), "Scipy <1.13 does not support 1D sparse arrays")
+    def test_solve_1D_sparse_rhs(self):
+        a = self.a.astype('d')
+        b = coo_array(self.b)
         x = um.spsolve(a, b)
         assert_allclose(a @ x, self.b)
 
