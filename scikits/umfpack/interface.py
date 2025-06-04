@@ -201,7 +201,16 @@ class UmfpackLU(object):
                     SparseEfficiencyWarning)
 
         A.sort_indices()
-        A = A.asfptype()  # upcast to a floating point format
+
+        # Upcast to float, supporting both arrays and matrices.
+        fp_types = ("f","d","F","D")
+        if A.dtype.char not in fp_types:
+            for fp_type in fp_types:
+                if A.dtype <= np.dtype(fp_type):
+                    A = A.astype(fp_type)
+                    break
+            else:
+                raise TypeError(f'cannot upcast [{A.dtype.name}] to a supported floating point format')
 
         M, N = A.shape
         if (M != N):
@@ -260,20 +269,26 @@ class UmfpackLU(object):
 
         Parameters
         ----------
-        B : any scipy.sparse matrix
+        B : any scipy.sparse array or matrix
             Right-hand side of the matrix equation.
-            Note: it will be converted to csc_matrix via `.tocsc()`.
+            Note: it will be converted to csc_array or csc_matrix via `.tocsc()`.
 
         Returns
         -------
-        X : csc_matrix
-            Solution to the matrix equation as a csc_matrix
+        X : csc_array or csc_matrix (depending on whether input was array or matrix)
+            Solution to the matrix equation.
         """
         B = B.tocsc()
+        mtx = sparse.isspmatrix(B)
         cols = list()
-        for j in xrange(B.shape[1]):
-            col = self.solve(B[:,j])
-            cols.append(csc_matrix(col))
+        for j in range(B.shape[1]):
+            # col index is in a list so that array stays 2D after slice
+            # (sparse matrix stays 2D even without using the list)
+            col = self.solve(B[:,[j]])
+            if mtx:
+                cols.append(csc_matrix(col))
+            else:
+                cols.append(sparse.csc_array(col))
         return hstack(cols)
 
     def _compute_lu(self):
