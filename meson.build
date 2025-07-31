@@ -1,7 +1,7 @@
 project(
   'scikits.umfpack',
   'c',
-  version: '0.4.1',
+  version: '0.4.2',
   license: 'BSD-3',
   default_options: [
     'c_std=c99',
@@ -10,6 +10,11 @@ project(
 
 fs = import('fs')
 py = import('python').find_installation(pure: false)
+
+# wrapper around swig to extract includes from umfpack dependency
+# future version of meson should fix this:
+# https://github.com/mesonbuild/meson/issues/8334
+meson_swig = fs.copyfile('meson_swig.py')
 
 cc = meson.get_compiler('c')
 
