@@ -3,6 +3,7 @@ build-backend = 'mesonpy'
 requires = [
     'meson-python',
     'numpy',
+    'swig'
 ]
 
 [project]
