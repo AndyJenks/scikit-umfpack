@@ -42,6 +42,34 @@ jobs:
         cd docs
         pytest --pyargs scikits.umfpack
 
+  ubuntu-free-threaded:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13t'
+
+    - name: Install dependencies from PyPI
+      run: |
+        # We're doing an isolated wheel build below, so only install the
+        # minimal dependencies needed to build a wheel and run the tests.
+        python -m pip install build pytest pytest-run-parallel
+
+    - name: Install Suitesparse and SWIG
+      run: |
+        sudo apt install libsuitesparse-dev swig
+
+    - name: Build a wheel
+      run: |
+        python -m build  # builds sdist, and then wheel from sdist
+        pip install dist/scikit*.whl
+
+    - name: Run test suite
+      run: |
+        cd docs
+        PYTHON_GIL=0 pytest --parallel-threads=10 --iterations=10 --pyargs scikits.umfpack
+
   conda-forge:
     runs-on: ${{ matrix.platform }}
     strategy:
