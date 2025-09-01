@@ -153,6 +153,13 @@ class TestSolversWithArrays(unittest.TestCase):
         self.mgr.__enter__()
 
         warnings.simplefilter('ignore', SparseEfficiencyWarning)
+        warnings.filterwarnings(
+            'ignore',
+            category=DeprecationWarning,
+            message=(
+                "From scikit-umfpack 0.5.0 onwards, UmfpackContext.lu will "
+                "return L & U as sparse arrays when called with an array.")
+            )
 
     def tearDown(self):
         self.mgr.__exit__()
