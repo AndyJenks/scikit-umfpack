@@ -143,11 +143,11 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     @unittest.skipIf(_is_32bit_platform, reason="requires 64 bit platform")
     def test_complex_int64_lu(self):
@@ -164,11 +164,11 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     def test_real_lu(self):
         # Getting factors of real matrix
@@ -184,11 +184,11 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     @unittest.skipIf(_is_32bit_platform, reason="requires 64 bit platform")
     def test_real_int64_lu(self):
@@ -205,11 +205,11 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     def setUp(self):
         random.seed(0)  # make tests repeatable
