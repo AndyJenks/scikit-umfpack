@@ -845,6 +845,13 @@ class UmfpackContext(Struct):
 
         """
 
+        if sp.issparse(mtx) and not sp.isspmatrix(mtx):
+            warnings.warn((
+                "From scikit-umfpack 0.5.0 onwards, UmfpackContext.lu will "
+                "return L & U as sparse arrays when called with an array."),
+                DeprecationWarning,
+                stacklevel=2)
+
         # this should probably be changed
         mtx = mtx.tocsc()
         self.numeric(mtx)

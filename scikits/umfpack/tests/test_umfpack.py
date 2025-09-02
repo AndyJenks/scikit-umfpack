@@ -33,6 +33,13 @@ class _DeprecationAccept(unittest.TestCase):
         self.mgr.__enter__()
 
         warnings.simplefilter('ignore', SparseEfficiencyWarning)
+        warnings.filterwarnings(
+            'ignore',
+            category=DeprecationWarning,
+            message=(
+                "From scikit-umfpack 0.5.0 onwards, UmfpackContext.lu will "
+                "return L & U as sparse arrays when called with an array.")
+            )
 
     def tearDown(self):
         self.mgr.__exit__()
@@ -131,9 +138,9 @@ class TestFactorization(_DeprecationAccept):
 
     def test_complex_lu(self):
         # Getting factors of complex matrix
-        umfpack = um.UmfpackContext("zi")
 
         for A in self.complex_matrices:
+            umfpack = um.UmfpackContext("zi")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
@@ -143,18 +150,18 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     @unittest.skipIf(_is_32bit_platform, reason="requires 64 bit platform")
     def test_complex_int64_lu(self):
         # Getting factors of complex matrix with long indices
-        umfpack = um.UmfpackContext("zl")
 
         for A in self.complex_int64_matrices:
+            umfpack = um.UmfpackContext("zl")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
@@ -164,17 +171,17 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     def test_real_lu(self):
         # Getting factors of real matrix
-        umfpack = um.UmfpackContext("di")
 
         for A in self.real_matrices:
+            umfpack = um.UmfpackContext("di")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
@@ -184,18 +191,18 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     @unittest.skipIf(_is_32bit_platform, reason="requires 64 bit platform")
     def test_real_int64_lu(self):
         # Getting factors of real matrix with long indices
-        umfpack = um.UmfpackContext("dl")
 
         for A in self.real_int64_matrices:
+            umfpack = um.UmfpackContext("dl")
             umfpack.numeric(A)
 
             (L,U,P,Q,R,do_recip) = umfpack.lu(A)
@@ -205,11 +212,11 @@ class TestFactorization(_DeprecationAccept):
             A = A.todense()
             if not do_recip:
                 R = 1.0/R
-            R = np.matrix(np.diag(R))
+            R = np.diag(R)
             P = np.eye(A.shape[0])[P,:]
             Q = np.eye(A.shape[1])[:,Q]
 
-            assert_array_almost_equal(P*R*A*Q,L*U)
+            assert_array_almost_equal(P @ R @ A @ Q, L @ U)
 
     def setUp(self):
         random.seed(0)  # make tests repeatable

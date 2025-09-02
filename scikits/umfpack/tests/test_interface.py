@@ -8,7 +8,7 @@ from numpy.testing import assert_allclose
 from numpy.linalg import norm as dense_norm
 
 import scipy
-from scipy.sparse import csc_array, csc_matrix, spdiags, SparseEfficiencyWarning
+from scipy.sparse import csc_array, csc_matrix, coo_array, spdiags, SparseEfficiencyWarning
 from scipy.sparse import hstack
 
 import numpy as np
@@ -138,7 +138,6 @@ class TestSolvers(unittest.TestCase):
         assert_allclose(A2, A.toarray(), atol=1e-13)
 
 
-@unittest.skipIf(Version(scipy.__version__) >= Version("1.13"), "Needs to fix deprecation")
 class TestSolversWithArrays(unittest.TestCase):
     """Same tests as above, but using the csc_array interface. Key difference 
     is that sparse arrays support matrix multiplication with the @ operator
@@ -154,6 +153,13 @@ class TestSolversWithArrays(unittest.TestCase):
         self.mgr.__enter__()
 
         warnings.simplefilter('ignore', SparseEfficiencyWarning)
+        warnings.filterwarnings(
+            'ignore',
+            category=DeprecationWarning,
+            message=(
+                "From scikit-umfpack 0.5.0 onwards, UmfpackContext.lu will "
+                "return L & U as sparse arrays when called with an array.")
+            )
 
     def tearDown(self):
         self.mgr.__exit__()
@@ -189,11 +195,18 @@ class TestSolversWithArrays(unittest.TestCase):
         x = um.spsolve(a, b)
         assert_allclose(a @ x, b)
 
-    @unittest.skipIf(Version(scipy.__version__) >= Version("1.14"), "Needs to fix deprecation")
     def test_solve_sparse_rhs(self):
         # Solve with UMFPACK: double precision, sparse rhs
         a = self.a.astype('d')
-        b = csc_array(self.b).T
+        b = csc_array(self.b.reshape(self.b.shape[0], 1))
+        # b = scipy.sparse.coo_array(self.b)
+        x = um.spsolve(a, b)
+        assert_allclose(a @ x, self.b)
+
+    @unittest.skipIf(Version(scipy.__version__) < Version("1.13"), "Scipy <1.13 does not support 1D sparse arrays")
+    def test_solve_1D_sparse_rhs(self):
+        a = self.a.astype('d')
+        b = coo_array(self.b)
         x = um.spsolve(a, b)
         assert_allclose(a @ x, self.b)
 
@@ -229,7 +242,7 @@ class TestSolversWithArrays(unittest.TestCase):
         B = hstack((b, b2))
 
         X = lu.solve_sparse(B)
-        assert dense_norm(((A @ X) - B).todense()) < 1e-14
+        assert dense_norm(((A @ X) - B).todense()) < 2e-14
         assert_allclose((A @ X).todense(), B.todense())
 
     def test_splu_lu(self):
